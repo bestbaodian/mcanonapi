@@ -61,17 +61,17 @@ class IndexController extends Controller
                     //获取用户注册错误信息
                     $error = $validator->errors()->all();
 
-                    $english = $this->Error($error);
+//                    $english = $this->Error($error);
                     //调用英文翻译接口
-                    $url = "http://fanyi.youdao.com/openapi.do?keyfrom=qwe1123&key=710353888&type=data&doctype=json&version=1.1&q=".$english;
+//                    $url = "http://fanyi.youdao.com/openapi.do?keyfrom=qwe1123&key=710353888&type=data&doctype=json&version=1.1&q=".$english;
 
                     //将内容读取出来
-                    $file = file_get_contents($url);
-                    $wrong=json_decode($file,true);
-                    $translation=$wrong['translation'];
+//                    $file = file_get_contents($url);
+//                    $wrong=json_decode($file,true);
+//                    $translation=$wrong['translation'];
                     $msg=array(
-                        "data"=>$translation,
-                        "info"=>$translation,
+                        "data"=>$error,
+                        "info"=>$error,
                         "error"=>'1010'
                     );
                     return json_encode($msg);
