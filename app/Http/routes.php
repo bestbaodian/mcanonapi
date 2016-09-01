@@ -14,5 +14,9 @@
 Route::get('/', function () {
     return view('welcome');
 });
+//注册
 Route::get('register', 'IndexController@register');
+//登录
 Route::get('login', 'IndexController@login');
+//修改密码
+Route::get('upd_pwd', 'IndexController@updpwd');

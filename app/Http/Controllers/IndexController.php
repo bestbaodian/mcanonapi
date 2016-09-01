@@ -176,4 +176,51 @@ class IndexController extends Controller
             return json_encode($msg);
         }
     }
+
+    /*
+    *修改密码
+        */
+    public function updpwd(Request $request)
+    {
+        //用户id
+        $uid=$request->get('uid');
+        //用户旧密码
+        $oldpwd=$request->get('oldpwd');
+        //用户新密码
+        $newpwds=$request->get('newpwd');
+        //密码加密
+        $newpwd=md5(md5($newpwds));
+        //判断是否为空
+        if(empty($uid)||empty($oldpwd)||empty($newpwd)){
+
+            $result["error"]=1;
+            $result["msg"]="参数有误";
+        }
+        else{
+            $opwd = md5(md5($oldpwd));
+            $arr=DB::table("users")->where("user_id","$uid")->where("user_pwd","$opwd")->get();
+            if($arr)
+            {
+                //根据用户id修改密码
+                $upd=DB::table("users")->where("user_id","$uid")->update(["user_pwd"=>"$newpwd"]);
+                if($upd)
+                {
+                    $result["error"]=0;
+                    $result["msg"]="修改成功";
+                }
+                else
+                {
+                    $result["error"]=2;
+                    $result["msg"]="修改失败";
+                }
+            }
+            else
+            {
+                $result["error"]=1;
+                $result["msg"]="参数有误";
+            }
+        }
+        return json_encode($result);
+    }
+
 }
