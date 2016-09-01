@@ -305,4 +305,47 @@ class IndexController extends Controller
             return json_encode($msg);
         }
     }
+
+    //面试资料添加接口
+    public function msdata(Request $request){
+        $data=$request->all();
+        $u_id=$data['u_id'];
+        $company=$data['company'];
+        $company_address=$data['company_address'];
+        $time=$data['time'];
+        if(!empty($u_id) && !empty($company) && !empty($time) && !empty($company_address)){
+            //入库
+            $add_data=DB::table('ic')->insert(
+                [
+                    'u_id' => $u_id,
+                    'company' => $company,
+                    'time'=>$time,
+                    'company_address'=>$company_address
+                ]);
+            if($add_data){
+                $msg=array(
+                    "info"=>'成功',
+                    "data"=>'面试资料入库成功',
+                    "error"=>'1000'
+                );
+                return json_encode($msg);
+            }else{
+                $msg=array(
+                    "info"=>'失败',
+                    "data"=>'面试资料入库失败',
+                    "error"=>'1013'
+                );
+                return json_encode($msg);
+            }
+        }else{
+            //信息填写不完整
+            $msg=array(
+                "info"=>'信息填写不完整',
+                "data"=>'参数不能为空',
+                "error"=>'1012'
+            );
+            return json_encode($msg);
+        }
+    }
+
 }

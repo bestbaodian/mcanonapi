@@ -26,6 +26,8 @@ Route::get('wenda', 'UserController@wenda');
 Route::get('bestnew', 'UserController@bestnew');
 /*答疑未回答接口*/
 Route::get('waitreply', 'UserController@waitreply');
+//面试资料添加
+Route::get('msdata', 'IndexController@msdata');
 //面试资料接口
 Route::get('ic_show',"IndexController@IC_show");
 //面试资料搜索
