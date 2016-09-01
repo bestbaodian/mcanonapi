@@ -87,7 +87,9 @@ class IndexController extends Controller
                     //设置用户session值
                     if($arr){
                         //添加成功
+                        $dataid = DB::table("users")->where("user_name",$name)->select("user_id")->first();
                         $msg=array(
+                            'user_id'=>$dataid['user_id'],
                             "data"=>"成功",
                             "info"=>"注册成功",
                             "error"=>'1000'
@@ -121,6 +123,7 @@ class IndexController extends Controller
                     ->first();
                 if($arr){
                     $msg=array(
+                        'user_id'=>$arr['user_id'],
                         "data"=>'成功',
                         "info"=>'手机号和密码正确',
                         "error"=>"1000"
@@ -142,6 +145,7 @@ class IndexController extends Controller
                     ->first();
                 if($arr){
                     $msg=array(
+                        'user_id'=>$arr['user_id'],
                         "data"=>'成功',
                         "info"=>'邮箱和密码输入正确',
                         "error"=>"1000"
