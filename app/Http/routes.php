@@ -20,3 +20,9 @@ Route::get('register', 'IndexController@register');
 Route::get('login', 'IndexController@login');
 //修改密码
 Route::get('upd_pwd', 'IndexController@updpwd');
+/*答疑推荐模块*/
+Route::get('wenda', 'UserController@wenda');
+/*答疑最新模块*/
+Route::get('bestnew', 'UserController@bestnew');
+/*答疑未回答*/
+Route::get('waitreply', 'UserController@waitreply');
