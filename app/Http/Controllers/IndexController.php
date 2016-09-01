@@ -176,7 +176,6 @@ class IndexController extends Controller
             return json_encode($msg);
         }
     }
-
     /*
     *修改密码
         */
@@ -223,4 +222,87 @@ class IndexController extends Controller
         return json_encode($result);
     }
 
+    //面试资料
+    public function IC_show(Request $request){
+        $user_id = $request->get("user_id");
+        if(!empty($user_id)){
+            $arr  =DB::table('ic')->select('*')
+                ->join("users","ic.u_id","=","users.user_id")
+                ->join("career","career.c_id","=","users.user_job")
+                ->select("company","time","user_name","c_career","ic.company_address")
+                ->where('u_id',$user_id)
+                ->orderBy('time','desc')
+                ->get();
+            $ic=DB::table('ic')
+                ->leftjoin('userinfo','ic.u_id','=','userinfo.u_id')
+                ->join("users","userinfo.u_id","=","users.user_id")
+                ->join("career","career.c_id","=","users.user_job")
+                ->select('userinfo.u_name',"c_career","ic.company_address",DB::raw("date_format(ic.time,'%Y-%m-%d %H:%i') as times"),'ic.company')
+                ->orderBy('times')
+                ->limit(10)
+                ->get();
+            $data['error']=0;
+            $data['user']=$arr;
+            $data['other']=$ic;
+            return json_encode($data);
+        }else{
+            $msg=array(
+                "data"=>'user_id有误',
+                "info"=>'用户id参数不正确',
+                "error"=>"2001"
+            );
+            return json_encode($msg);
+        }
+    }
+    //面试资料搜索
+    public function IC_search(Request $request){
+        $company  = $request->get("company");
+        $times    = $request->get("times");
+        $username = $request->get("username");
+        if($company || $times || $username){
+            if($company){
+                $where['company']=$company;
+            }if($username){
+                $where['u_name']=$username;
+            }
+            if($times){
+                $ic=DB::table('ic')
+                    ->leftjoin('userinfo','ic.u_id','=','userinfo.u_id')
+                    ->join("users","userinfo.u_id","=","users.user_id")
+                    ->join("career","career.c_id","=","user_job")
+                    ->where($where)->where(DB::raw("date_format(time,'%Y-%m-%d')"),$times)
+                    ->select('userinfo.u_name',"c_career","ic.company_address",DB::raw("date_format(ic.time,'%Y-%m-%d %H:%i') as times"),'ic.company')
+                    ->orderBy('times')
+                    ->get();
+            }else{
+                $ic=DB::table('ic')
+                    ->leftjoin('userinfo','ic.u_id','=','userinfo.u_id')
+                    ->join("users","userinfo.u_id","=","users.user_id")
+                    ->join("career","career.c_id","=","user_job")
+                    ->where($where)
+                    ->select('userinfo.u_name',"c_career","ic.company_address",DB::raw("date_format(ic.time,'%Y-%m-%d %H:%i') as times"),'ic.company')
+                    ->get();
+            }
+            if($ic){
+                $msg = array(
+                    "error"=>0,
+                    "data"=>$ic,
+                );
+            }else{
+                $msg = array(
+                    "error"=>"2002",
+                    "msg"=>"暂无信息",
+                );
+            }
+
+            return json_encode($msg);
+        }else{
+            $msg=array(
+                "data"=>'无参数',
+                "info"=>'请求错误',
+                "error"=>"2001"
+            );
+            return json_encode($msg);
+        }
+    }
 }
