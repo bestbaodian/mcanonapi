@@ -229,7 +229,7 @@ class IndexController extends Controller
             $arr  =DB::table('ic')->select('*')
                 ->join("users","ic.u_id","=","users.user_id")
                 ->join("career","career.c_id","=","users.user_job")
-                ->select("company","time","user_name","c_career","ic.company_address","describe")
+                ->select("company","time","userinfo.u_name","c_career","ic.company_address","describe")
                 ->where('u_id',$user_id)
                 ->orderBy('time','desc')
                 ->paginate(10);
