@@ -228,9 +228,10 @@ class IndexController extends Controller
         if(!empty($user_id)){
             $arr  =DB::table('ic')->select('*')
                 ->join("users","ic.u_id","=","users.user_id")
+                ->join("userinfo","users.user_id","=","userinfo.u_id")
                 ->join("career","career.c_id","=","users.user_job")
                 ->select("company","time","userinfo.u_name","c_career","ic.company_address","describe")
-                ->where('u_id',$user_id)
+                ->where('users.user_id',$user_id)
                 ->orderBy('time','desc')
                 ->paginate(10);
             $data['error']=0;
@@ -241,6 +242,8 @@ class IndexController extends Controller
             $data['currentPage']=$arr->currentPage();
             //共多少页
             $data['lastPage']=$arr->lastPage();
+
+            //print_r($data);die;
             return json_encode($data);
         }else{
             $msg=array(
