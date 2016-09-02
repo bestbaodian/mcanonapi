@@ -28,9 +28,13 @@ Route::get('bestnew', 'UserController@bestnew');
 Route::get('waitreply', 'UserController@waitreply');
 //面试资料添加
 Route::get('msdata', 'IndexController@msdata');
-//面试资料接口
-Route::get('ic_show',"IndexController@IC_show");
+//个人用户面试资料接口
+Route::get('user_show',"IndexController@IC_show");
+//所有用户面试资料接口
+Route::get('other_show',"IndexController@other_show");
 //面试资料搜索
 Route::get('ic_search',"IndexController@ic_search");
 //方法模块显示数据
 Route::get('showffdata', 'IndexController@showffdata');
+//答疑模块添加数据
+Route::get('add_questions', 'IndexController@add_questions');

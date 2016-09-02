@@ -232,18 +232,9 @@ class IndexController extends Controller
                 ->select("company","time","user_name","c_career","ic.company_address","describe")
                 ->where('u_id',$user_id)
                 ->orderBy('time','desc')
-                ->get();
-            $ic=DB::table('ic')
-                ->leftjoin('userinfo','ic.u_id','=','userinfo.u_id')
-                ->join("users","userinfo.u_id","=","users.user_id")
-                ->join("career","career.c_id","=","users.user_job")
-                ->select('userinfo.u_name',"describe","c_career","ic.company_address",DB::raw("date_format(ic.time,'%Y-%m-%d %H:%i') as times"),'ic.company')
-                ->orderBy('times')
-                ->limit(10)
-                ->get();
+                ->paginate(10);
             $data['error']=0;
             $data['user']=$arr;
-            $data['other']=$ic;
             return json_encode($data);
         }else{
             $msg=array(
@@ -253,6 +244,19 @@ class IndexController extends Controller
             );
             return json_encode($msg);
         }
+    }
+    //其他用户面试资料展示
+    public function other_show(){
+        $ic=DB::table('ic')
+            ->leftjoin('userinfo','ic.u_id','=','userinfo.u_id')
+            ->join("users","userinfo.u_id","=","users.user_id")
+            ->join("career","career.c_id","=","users.user_job")
+            ->select('userinfo.u_name',"describe","c_career","ic.company_address",DB::raw("date_format(ic.time,'%Y-%m-%d %H:%i') as times"),'ic.company')
+            ->orderBy('times')
+            ->paginate(10);
+        $data['error']=0;
+        $data['other']=$ic;
+        return json_encode($data);
     }
     //面试资料搜索
     public function IC_search(Request $request){
@@ -349,7 +353,6 @@ class IndexController extends Controller
             return json_encode($msg);
         }
     }
-
     ////方法模块 显示数据
     public function showffdata(Request $request){
         $data=$request->all();
@@ -473,5 +476,49 @@ class IndexController extends Controller
             }
         }
 
+    }
+    //答疑模块添加提问
+    public function add_questions(Request $request){
+        $data=$request->all();
+        $t_title=$data['t_title'];
+        $t_content=$data['t_content'];
+        $user_id=$data['user_id'];
+        $d_id=$data['d_id'];
+        $add_time=$data['add_time'];
+        if(!empty($t_title) && !empty($t_content) && !empty($t_content) && !empty($user_id) && !empty($d_id) && !empty($t_title) && !empty($add_time)){
+            //添加数据库
+            $arr=DB::table('t_tw')->insert(
+                [
+                    't_title' => $t_title,
+                    't_content' => $t_content,
+                    'user_id'=> $user_id,
+                    'd_id'=> $d_id,
+                    'add_time'=>$add_time
+                ]);
+            if($arr){
+                //添加成功
+                $msg=array(
+                    "info"=>'成功',
+                    "data"=>'添加数据成功',
+                    "error"=>'1000'
+                );
+                return json_encode($msg);
+            }else{
+                //添加失败
+                $msg=array(
+                    "info"=>'失败',
+                    "data"=>'添加数据失败',
+                    "error"=>'1019'
+                );
+                return json_encode($msg);
+            }
+        }else{
+            $msg=array(
+                "info"=>'参数不完整',
+                "data"=>'参数不能为空',
+                "error"=>'1018'
+            );
+            return json_encode($msg);
+        }
     }
 }
