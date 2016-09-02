@@ -229,7 +229,7 @@ class IndexController extends Controller
             $arr  =DB::table('ic')->select('*')
                 ->join("users","ic.u_id","=","users.user_id")
                 ->join("career","career.c_id","=","users.user_job")
-                ->select("company","time","user_name","c_career","ic.company_address")
+                ->select("company","time","user_name","c_career","ic.company_address","describe")
                 ->where('u_id',$user_id)
                 ->orderBy('time','desc')
                 ->get();
@@ -237,7 +237,7 @@ class IndexController extends Controller
                 ->leftjoin('userinfo','ic.u_id','=','userinfo.u_id')
                 ->join("users","userinfo.u_id","=","users.user_id")
                 ->join("career","career.c_id","=","users.user_job")
-                ->select('userinfo.u_name',"c_career","ic.company_address",DB::raw("date_format(ic.time,'%Y-%m-%d %H:%i') as times"),'ic.company')
+                ->select('userinfo.u_name',"describe","c_career","ic.company_address",DB::raw("date_format(ic.time,'%Y-%m-%d %H:%i') as times"),'ic.company')
                 ->orderBy('times')
                 ->limit(10)
                 ->get();
@@ -271,7 +271,7 @@ class IndexController extends Controller
                     ->join("users","userinfo.u_id","=","users.user_id")
                     ->join("career","career.c_id","=","user_job")
                     ->where($where)->where(DB::raw("date_format(time,'%Y-%m-%d')"),$times)
-                    ->select('userinfo.u_name',"c_career","ic.company_address",DB::raw("date_format(ic.time,'%Y-%m-%d %H:%i') as times"),'ic.company')
+                    ->select("describe",'userinfo.u_name',"c_career","ic.company_address",DB::raw("date_format(ic.time,'%Y-%m-%d %H:%i') as times"),'ic.company')
                     ->orderBy('times')
                     ->get();
             }else{
@@ -280,7 +280,7 @@ class IndexController extends Controller
                     ->join("users","userinfo.u_id","=","users.user_id")
                     ->join("career","career.c_id","=","user_job")
                     ->where($where)
-                    ->select('userinfo.u_name',"c_career","ic.company_address",DB::raw("date_format(ic.time,'%Y-%m-%d %H:%i') as times"),'ic.company')
+                    ->select("describe",'userinfo.u_name',"c_career","ic.company_address",DB::raw("date_format(ic.time,'%Y-%m-%d %H:%i') as times"),'ic.company')
                     ->get();
             }
             if($ic){
@@ -313,14 +313,16 @@ class IndexController extends Controller
         $company=$data['company'];
         $company_address=$data['company_address'];
         $time=$data['time'];
-        if(!empty($u_id) && !empty($company) && !empty($time) && !empty($company_address)){
+        $describe = $data['describe'];
+        if(!empty($u_id) && !empty($company) && !empty($time) && !empty($company_address) && !empty($describe)){
             //入库
             $add_data=DB::table('ic')->insert(
                 [
                     'u_id' => $u_id,
                     'company' => $company,
                     'time'=>$time,
-                    'company_address'=>$company_address
+                    'company_address'=>$company_address,
+                    'describe'=>$describe
                 ]);
             if($add_data){
                 $msg=array(
@@ -348,4 +350,128 @@ class IndexController extends Controller
         }
     }
 
+    ////方法模块 显示数据
+    public function showffdata(Request $request){
+        $data=$request->all();
+        $at_id=$data['at_id'];
+        $top=$data['top'];
+        if($at_id){
+            if($top){
+                //有分类下的最热
+
+                $article = DB::table('article')
+                    ->join('users', 'article.a_adduser', '=', 'users.user_id')
+                    ->leftJoin('ar_type', 'article.a_type', '=', 'ar_type.at_id')
+                    ->select('users.user_name', 'a_id', 'a_title', 'at_type', 'a_con', 'a_addtime', 'a_num', 'brows', 'a_pingnum')
+                    ->where("article.a_type", $data['at_id'])
+                    ->where("a_state", 1)
+                    ->orderBy('brows', 'desc')
+                    ->get();
+                foreach($article as $key=>$v){
+                    $article[$key]["a_con"] = htmlspecialchars($v['a_con']);
+                }
+                if($article){
+                    $msg=array(
+                        "info"=>'成功展示数据',
+                        "data"=>$article,
+                        "error"=>'1000'
+                    );
+                    return json_encode($msg);
+                }else{
+                    $msg=array(
+                        "info"=>'数据为空',
+                        "data"=>'有分类下的最热没有数据',
+                        "error"=>'1014'
+                    );
+                    return json_encode($msg);
+                }
+            }
+            //有分类下的最新
+            $article = DB::table('article')
+                ->join('users', 'article.a_adduser', '=', 'users.user_id')
+                ->leftJoin('ar_type', 'article.a_type', '=', 'ar_type.at_id')
+                ->select('users.user_name', 'a_id', 'a_title', 'at_type', 'a_con', 'a_addtime', 'a_num', 'brows', 'a_pingnum')
+                ->where("article.a_type", $data['at_id'])
+                ->where("a_state", 1)
+                ->orderBy('a_id', 'desc')
+                ->get();
+            foreach($article as $key=>$v){
+                $article[$key]["a_con"] = htmlspecialchars($v['a_con']);
+            }
+            if($article){
+                $msg=array(
+                    "info"=>'成功展示数据',
+                    "data"=>$article,
+                    "error"=>'1000'
+                );
+                return json_encode($msg);
+            }else{
+                $msg=array(
+                    "info"=>'数据为空',
+                    "data"=>'有分类下的最新没有数据',
+                    "error"=>'1015'
+                );
+                return json_encode($msg);
+            }
+        }else{
+            if($top){
+                //全部分类下的最热
+
+                $article = DB::table('article')
+                    ->join('users', 'article.a_adduser', '=', 'users.user_id')
+                    ->leftJoin('ar_type', 'article.a_type', '=', 'ar_type.at_id')
+                    ->select('users.user_name', 'a_id', 'a_title', 'at_type', 'a_con', 'a_addtime', 'a_num', 'brows', 'a_pingnum')
+                    ->where("a_state", 1)
+                    ->orderBy('brows', 'desc')
+                    ->get();
+                foreach($article as $key=>$v){
+                    $article[$key]["a_con"] = htmlspecialchars($v['a_con']);
+                }
+                if($article){
+                    $msg=array(
+                        "info"=>'成功展示数据',
+                        "data"=>$article,
+                        "error"=>'1000'
+                    );
+                    return json_encode($msg);
+                }else{
+                    $msg=array(
+                        "info"=>'数据为空',
+                        "data"=>'全部分类下的最热没有数据',
+                        "error"=>'1016'
+                    );
+                    return json_encode($msg);
+                }
+            }
+            //全部分类下的最新
+            $article = DB::table('article')
+                ->join('users', 'article.a_adduser', '=', 'users.user_id')
+                ->leftJoin('ar_type', 'article.a_type', '=', 'ar_type.at_id')
+                ->select('users.user_name', 'a_id', 'a_title', 'at_type', 'a_con', 'a_addtime', 'a_num', 'brows', 'a_pingnum')
+                ->where("a_state", 1)
+                ->orderBy('a_id', 'desc')
+                ->get();
+            header("content-type:text/html;charset=utf8");
+            foreach($article as $key=>$v){
+                $article[$key]["a_con"] = htmlspecialchars($v['a_con']);
+            }
+            print_r($article);die;
+            if($article){
+                $msg=array(
+                    "info"=>'成功返回数据',
+                    "data"=>$article,
+                    "error"=>'1000'
+                );
+                return json_encode($msg);
+            }else{
+                $msg=array(
+                    "info"=>'数据为空',
+                    "data"=>'全部分类下的最新没有数据',
+                    "error"=>'1017'
+                );
+                return json_encode($msg);
+            }
+        }
+
+    }
 }

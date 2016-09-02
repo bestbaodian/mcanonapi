@@ -32,3 +32,5 @@ Route::get('msdata', 'IndexController@msdata');
 Route::get('ic_show',"IndexController@IC_show");
 //面试资料搜索
 Route::get('ic_search',"IndexController@ic_search");
+//方法模块显示数据
+Route::get('showffdata', 'IndexController@showffdata');
