@@ -247,6 +247,7 @@ class IndexController extends Controller
     }
     //其他用户面试资料展示
     public function other_show(){
+        header("content-type:text/html;charset=utf8");
         $ic=DB::table('ic')
             ->leftjoin('userinfo','ic.u_id','=','userinfo.u_id')
             ->join("users","userinfo.u_id","=","users.user_id")
