@@ -235,6 +235,12 @@ class IndexController extends Controller
                 ->paginate(10);
             $data['error']=0;
             $data['user']=$arr;
+            //共有多少
+            $data['total']=$arr->total();
+            //当前页
+            $data['currentPage']=$arr->currentPage();
+            //共多少页
+            $data['lastPage']=$arr->lastPage();
             return json_encode($data);
         }else{
             $msg=array(
@@ -257,6 +263,12 @@ class IndexController extends Controller
             ->paginate(10);
         $data['error']=0;
         $data['other']=$ic;
+        //共有多少
+        $data['total']=$ic->total();
+        //当前页
+        $data['currentPage']=$ic->currentPage();
+        //共多少页
+        $data['lastPage']=$ic->lastPage();
         return json_encode($data);
     }
     //面试资料搜索
