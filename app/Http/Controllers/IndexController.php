@@ -261,7 +261,7 @@ class IndexController extends Controller
             ->leftjoin('userinfo','ic.u_id','=','userinfo.u_id')
             ->join("users","userinfo.u_id","=","users.user_id")
             ->join("career","career.c_id","=","users.user_job")
-            ->select('userinfo.u_name',"describe","c_career","ic.company_address",DB::raw("date_format(ic.time,'%Y-%m-%d %H:%i') as times"),'ic.company')
+            ->select('userinfo.u_name',"describe","c_career","ic.company_address",DB::raw("date_format(ic.time,'%Y-%m-%d %H:%i') as time"),'ic.company')
             ->orderBy('times')
             ->paginate(10);
         $data['error']=0;
