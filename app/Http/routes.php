@@ -38,3 +38,11 @@ Route::get('ic_search',"IndexController@ic_search");
 Route::get('showffdata', 'IndexController@showffdata');
 //答疑模块添加数据
 Route::get('add_questions', 'IndexController@add_questions');
+/*用户评论*/
+Route::get('content', 'UserController@userContent');
+/*用户点赞*/
+Route::get('zan', 'UserController@userZan');
+//个人简历
+Route::post('useresume', 'UserController@userResume');
+//个人中心 修改上传头像
+Route::post('set_headpic', 'UserController@set_headpic');

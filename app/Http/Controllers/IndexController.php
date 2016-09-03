@@ -261,7 +261,7 @@ class IndexController extends Controller
             ->leftjoin('userinfo','ic.u_id','=','userinfo.u_id')
             ->join("users","userinfo.u_id","=","users.user_id")
             ->join("career","career.c_id","=","users.user_job")
-            ->select('userinfo.u_name',"describe","c_career","ic.company_address",DB::raw("date_format(ic.time,'%Y-%m-%d %H:%i') as time"),'ic.company')
+            ->select('userinfo.u_name','describe','c_career','ic.company_address',DB::raw("date_format(ic.time,'%Y-%m-%d %H:%i') as time"),'ic.company')
             ->orderBy('time')
             ->paginate(10);
         $data['error']=0;
@@ -291,16 +291,16 @@ class IndexController extends Controller
                     ->join("users","userinfo.u_id","=","users.user_id")
                     ->join("career","career.c_id","=","user_job")
                     ->where($where)->where(DB::raw("date_format(time,'%Y-%m-%d')"),$times)
-                    ->select("describe",'userinfo.u_name',"c_career","ic.company_address",DB::raw("date_format(ic.time,'%Y-%m-%d %H:%i') as times"),'ic.company')
+                    ->select('describe','userinfo.u_name','c_career','ic.company_address',DB::raw("date_format(ic.time,'%Y-%m-%d %H:%i') as times"),'ic.company')
                     ->orderBy('times')
                     ->get();
             }else{
                 $ic=DB::table('ic')
                     ->leftjoin('userinfo','ic.u_id','=','userinfo.u_id')
-                    ->join("users","userinfo.u_id","=","users.user_id")
+                    ->join('users','userinfo.u_id',"=","users.user_id")
                     ->join("career","career.c_id","=","user_job")
                     ->where($where)
-                    ->select("describe",'userinfo.u_name',"c_career","ic.company_address",DB::raw("date_format(ic.time,'%Y-%m-%d %H:%i') as times"),'ic.company')
+                    ->select('describe','userinfo.u_name','c_career','ic.company_address',DB::raw("date_format(ic.time,'%Y-%m-%d %H:%i') as times"),'ic.company')
                     ->get();
             }
             if($ic){
@@ -333,17 +333,35 @@ class IndexController extends Controller
         $company=$data['company'];
         $company_address=$data['company_address'];
         $time=$data['time'];
+        if(!is_int(strtotime($time))){
+            $msg=array(
+                "info"=>'添加时间不正确',
+                "error"=>'20168'
+            );
+            return json_encode($msg);
+        }
         $describe = $data['describe'];
         if(!empty($u_id) && !empty($company) && !empty($time) && !empty($company_address) && !empty($describe)){
             //入库
-            $add_data=DB::table('ic')->insert(
-                [
-                    'u_id' => $u_id,
-                    'company' => $company,
-                    'time'=>$time,
-                    'company_address'=>$company_address,
-                    'describe'=>$describe
-                ]);
+            $pro = DB::table("userinfo")
+                ->where("u_id",$u_id)
+                ->get();
+            if($pro){
+                $add_data=DB::table('ic')->insert(
+                    [
+                        'u_id' => $u_id,
+                        'company' => $company,
+                        'time'=>$time,
+                        'company_address'=>$company_address,
+                        'describe'=>$describe
+                    ]);
+            }else{
+                $msg=array(
+                    "info"=>'用户须实名认证',
+                    "error"=>'20096'
+                );
+                return json_encode($msg);
+            }
             if($add_data){
                 $msg=array(
                     "info"=>'成功',
@@ -537,4 +555,5 @@ class IndexController extends Controller
             return json_encode($msg);
         }
     }
+
 }
