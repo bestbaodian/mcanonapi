@@ -471,4 +471,61 @@ class UserController extends Controller
 
     }
 
+    //个人中心实名认证
+    public function setmsg(Request $request){
+        $u_id=$request->get('uid');
+        $u_name=$request->get('u_name');
+        $id_card=$request->get('id_card');
+        if(!preg_match("/^[1-9]\d{5}[1-9]\d{3}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}(\d|x|X)$/", $id_card)){
+            $data = array(
+                "error"=>12444,
+                "info"=>"身份证号码不正确"
+            );
+            return json_encode($data);
+        }
+        if (!preg_match("/^[\x{4e00}-\x{9fa5}]{2,4}$/u",$u_name)) {
+            $data = array(
+                "error"=>22332,
+                "info"=>"实名姓名必须为中文4位以内"
+            );
+            return json_encode($data);
+        }
+
+        if(!empty($u_id) && !empty($u_name) && !empty($id_card)){
+            $ds = DB::table("users")->where("user_id",$u_id)->first();
+            //判断用户是否存在
+            if($ds==""){
+                $data = array(
+                    "error"=>12232,
+                    "info"=>"该用户不纯在"
+                );
+                return json_encode($data);
+            }
+
+            $ksl = DB::table("userinfo")->where("u_id",$u_id)->get();
+            if($ksl){
+                $data = array(
+                    "error"=>10001,
+                    "info"=>"该用户已经实名"
+                );
+                return json_encode($data);
+            }else{
+                $see = DB::insert("insert into userinfo (u_id,u_name,u_idcard) VALUE ('$u_id','$u_name','$id_card')");
+                $ksl = DB::table("userinfo")->where("u_id",$u_id)->get();
+                $data = array(
+                    "msg"=>10000,
+                    "info"=>"实名成功",
+                    "data"=>$ksl
+                );
+                return json_encode($data);
+            }
+        }else{
+            $data = array(
+                "error"=>23315,
+                "info"=>"参数有误,有空字段"
+            );
+            return json_encode($data);
+        }
+
+    }
 }

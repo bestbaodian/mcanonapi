@@ -46,3 +46,5 @@ Route::get('zan', 'UserController@userZan');
 Route::post('useresume', 'UserController@userResume');
 //个人中心 修改上传头像
 Route::post('set_headpic', 'UserController@set_headpic');
+//实名认证
+Route::get('setmsg', 'UserController@setmsg');
