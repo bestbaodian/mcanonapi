@@ -456,13 +456,14 @@ class UserController extends Controller
                 $user_filedir = $destinationPath.$fileName;
                 $sql = "update users set user_filedir = '$user_filedir' where user_id = '$user_id'";
                 $upd = DB::select($sql);
-
+                $ses = DB::table("users")->where("user_id",1)->select("user_filedir")->first();
+                $sed="http://123.56.249.121/mcanonapi/public/picture/".$ses['user_filedir'];
                 /*
                  * 修改用户头像重新设置session
                  */
                 $msg=array(
                     "info"=>'成功',
-                    "data"=>'上传成功',
+                    "data"=>$sed,
                     "error"=>'1000'
                 );
                 return json_encode($msg);
@@ -526,6 +527,76 @@ class UserController extends Controller
             );
             return json_encode($data);
         }
+
+    }
+
+    //个人中心修改资料接口
+    public function set_data(Request $request){
+        $data=$request->all();
+        //用户id  昵称  职位  性别  个性签名
+        $user_id=isset($data['user_id'])?$data['user_id']:"";
+        $user_name=isset($data['user_name'])?$data['user_name']:"";
+        $user_job=isset($data['user_job'])?$data['user_job']:"";
+        $user_sex=isset($data['user_sex'])?$data['user_sex']:"";
+        $user_aboutme=isset($data['user_aboutme'])?$data['user_aboutme']:"";
+
+        if(!empty($user_id) && !empty($user_name) && !empty($user_job) && !empty($user_sex) && !empty($user_aboutme)){
+            if(!preg_match("/^(\d)+$/",$user_id)){
+                $msg=array(
+                    "info"=>'参数有误user_id不正确',
+                    "error"=>'10032'
+                );
+                return json_encode($msg);
+            }
+            if(!preg_match("/^(\d)+$/",$user_sex)){
+                $msg=array(
+                    "info"=>'参数有误性别必须位数字',
+                    "error"=>'10033'
+                );
+            }
+            if(!preg_match("/^(\d)+$/",$user_job)){
+                $msg=array(
+                    "info"=>'参数有误职位必须位数字',
+                    "error"=>'10034'
+                );
+            }
+            //修改数据库
+            $upd=DB::table('users')
+                ->where('user_id', $user_id)
+                ->update([
+                    'user_name' => $user_name,
+                    'user_job' => $user_job,
+                    'user_sex' => $user_sex,
+                    'user_aboutme'=>$user_aboutme
+                ]);
+            $msg=array(
+                "info"=>'修改成功',
+                "msg"=>'1000'
+            );
+            return json_encode($msg);
+        }else{
+            if($user_id!="" and $user_name=="" and $user_job=="" and $user_sex=="" and $user_aboutme==""){
+                $db = DB::table("users")
+                    ->join("career","users.user_job","=","career.c_id")
+                    ->where("user_id",$user_id)
+                    ->select("user_id","user_name","career.c_career","user_sex","user_aboutme")
+                    ->first();
+                if($db['user_sex']==""){
+                    $db['user_sex']="保密";
+                }elseif($db['user_sex']==1){
+                    $db['user_sex']="男";
+                }elseif($db['user_sex']==2){
+                    $db['user_sex']="女";
+                }
+                $arrs = array(
+                    "data"=>$db,
+                    "msg"=>10003
+                );
+                return json_encode($arrs);
+            }
+        }
+
+
 
     }
 }

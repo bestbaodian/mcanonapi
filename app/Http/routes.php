@@ -48,3 +48,6 @@ Route::post('useresume', 'UserController@userResume');
 Route::post('set_headpic', 'UserController@set_headpic');
 //实名认证
 Route::get('setmsg', 'UserController@setmsg');
+//个人中心修改资料接口
+Route::get('set_data', 'UserController@set_data');
+
