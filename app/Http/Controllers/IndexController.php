@@ -226,25 +226,27 @@ class IndexController extends Controller
     public function IC_show(Request $request){
         $user_id = $request->get("user_id");
         if(!empty($user_id)){
-            $arr  =DB::table('ic')->select('*')
-                ->join("users","ic.u_id","=","users.user_id")
-                ->join("userinfo","users.user_id","=","userinfo.u_id")
-                ->join("career","career.c_id","=","users.user_job")
-                ->select("company","time","userinfo.u_name","c_career","ic.company_address","describe")
-                ->where('users.user_id',$user_id)
-                ->orderBy('time','desc')
-                ->paginate(10);
-            $data['error']=0;
-            $data['user']=$arr;
-            //共有多少
-            $data['total']=$arr->total();
-            //当前页
-            $data['currentPage']=$arr->currentPage();
-            //共多少页
-            $data['lastPage']=$arr->lastPage();
+            $sdd = DB::table("userinfo")->where("u_id",$user_id)->first();
+            if($sdd){
+                $arr  =DB::table('ic')->select('*')
+                    ->join("users","ic.u_id","=","users.user_id")
+                    ->join("userinfo","ic.u_id","=","userinfo.u_id")
+                    ->join("career","ic.quarters","=","career.c_id")
+                    ->select("company","time","ic.company_address","describe","c_career")
+                    ->where('users.user_id',$user_id)
+                    ->orderBy('time','desc')
+                    ->get();
+                $data['error']=0;
+                $data['user']=$arr;
+                return json_encode($data);
+            }else{
+                $daas=array(
+                        "error"=>10029,
+                    "info"=>"用户暂未实名"
+                );
+                return json_encode($daas);
+            }
 
-            //print_r($data);die;
-            return json_encode($data);
         }else{
             $msg=array(
                 "data"=>'user_id有误',
@@ -260,7 +262,7 @@ class IndexController extends Controller
         $ic=DB::table('ic')
             ->leftjoin('userinfo','ic.u_id','=','userinfo.u_id')
             ->join("users","userinfo.u_id","=","users.user_id")
-            ->join("career","career.c_id","=","users.user_job")
+            ->join("career","career.c_id","=","ic.quarters")
             ->select('userinfo.u_name','describe','c_career','ic.company_address',DB::raw("date_format(ic.time,'%Y-%m-%d %H:%i') as time"),'ic.company')
             ->orderBy('time')
             ->paginate(10);
@@ -329,10 +331,11 @@ class IndexController extends Controller
     //面试资料添加接口
     public function msdata(Request $request){
         $data=$request->all();
-        $u_id=$data['u_id'];
-        $company=$data['company'];
-        $company_address=$data['company_address'];
-        $time=$data['time'];
+        $u_id=isset($data['u_id'])?$data['u_id']:"";
+        $company=isset($data['company'])?$data['company']:"";
+        $company_address=isset($data['company_address'])?$data['company_address']:"";
+        $time=isset($data['time'])?$data['time']:"";
+        $quarters=isset($data['quarters'])?$data['quarters']:"";
         if(!is_int(strtotime($time))){
             $msg=array(
                 "info"=>'添加时间不正确',
@@ -341,7 +344,7 @@ class IndexController extends Controller
             return json_encode($msg);
         }
         $describe = $data['describe'];
-        if(!empty($u_id) && !empty($company) && !empty($time) && !empty($company_address) && !empty($describe)){
+        if(!empty($u_id) && !empty($company) && !empty($time) && !empty($company_address) && !empty($describe) && !empty($quarters)){
             //入库
             $pro = DB::table("userinfo")
                 ->where("u_id",$u_id)
@@ -353,7 +356,8 @@ class IndexController extends Controller
                         'company' => $company,
                         'time'=>$time,
                         'company_address'=>$company_address,
-                        'describe'=>$describe
+                        'describe'=>$describe,
+                        'quarters'=>$quarters
                     ]);
             }else{
                 $msg=array(
@@ -390,12 +394,11 @@ class IndexController extends Controller
     ////方法模块 显示数据
     public function showffdata(Request $request){
         $data=$request->all();
-        $at_id=$data['at_id'];
-        $top=$data['top'];
+        $at_id=isset($data['at_id'])?$data['at_id']:"";
+        $top=isset($data['top'])?$data['top']:"";
         if($at_id){
             if($top){
                 //有分类下的最热
-
                 $article = DB::table('article')
                     ->join('users', 'article.a_adduser', '=', 'users.user_id')
                     ->leftJoin('ar_type', 'article.a_type', '=', 'ar_type.at_id')
@@ -514,11 +517,11 @@ class IndexController extends Controller
     //答疑模块添加提问
     public function add_questions(Request $request){
         $data=$request->all();
-        $t_title=$data['t_title'];
-        $t_content=$data['t_content'];
-        $user_id=$data['user_id'];
-        $d_id=$data['d_id'];
-        $add_time=$data['add_time'];
+        $t_title=isset($data['t_title'])?$data['t_title']:"";
+        $t_content=isset($data['t_content'])?$data['t_content']:"";
+        $user_id=isset($data['user_id'])?$data['user_id']:"";
+        $d_id=isset($data['d_id'])?$data['d_id']:"";
+        $add_time=isset($data['add_time'])?$data['add_time']:"";
         if(!empty($t_title) && !empty($t_content) && !empty($t_content) && !empty($user_id) && !empty($d_id) && !empty($t_title) && !empty($add_time)){
             //添加数据库
             $arr=DB::table('t_tw')->insert(
