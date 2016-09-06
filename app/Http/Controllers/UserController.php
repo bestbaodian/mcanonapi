@@ -553,12 +553,14 @@ class UserController extends Controller
                     "info"=>'参数有误性别必须位数字',
                     "error"=>'10033'
                 );
+                return json_encode($msg);
             }
             if(!preg_match("/^(\d)+$/",$user_job)){
                 $msg=array(
                     "info"=>'参数有误职位必须位数字',
                     "error"=>'10034'
                 );
+                return json_encode($msg);
             }
             //修改数据库
             $upd=DB::table('users')

@@ -222,7 +222,7 @@ class IndexController extends Controller
         return json_encode($result);
     }
 
-    //面试资料
+    //个人面试资料
     public function IC_show(Request $request){
         $user_id = $request->get("user_id");
         if(!empty($user_id)){
