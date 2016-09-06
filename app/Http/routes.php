@@ -50,4 +50,6 @@ Route::post('set_headpic', 'UserController@set_headpic');
 Route::get('setmsg', 'UserController@setmsg');
 //个人中心修改资料接口
 Route::get('set_data', 'UserController@set_data');
+//方法模块评论展示
+Route::get("show_ping","IndexController@f_ping");
 

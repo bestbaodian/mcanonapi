@@ -558,5 +558,33 @@ class IndexController extends Controller
             return json_encode($msg);
         }
     }
+    //方法评论展示
+    public function f_ping(Request $request){
+        //用户id
+        $aid=$request->get("a_id");
+        $aid = isset($aid)?$aid:"";
+        if(!empty($aid)){
+            $result = DB::table("aping")->select("ap_con","u_id","ap_addtime")->where("a_id",$aid)->get();
+            //print_r($result);
+            if(empty($result)){
+                $msg=array(
+                    "data"=>"暂无评论",
+                    "error"=>10006
+                );
+            }else{
+                $msg = array(
+                    "data"=>$result,
+                    "msg"=>"10000"
+                );
+            }
+            return json_encode($msg);
+        }else{
+            $msg = array(
+                "data"=>"参数有误,文章id不正确",
+                "msg"=>"10003"
+            );
+            return json_encode($msg);
+        }
 
+    }
 }
